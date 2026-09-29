@@ -121,7 +121,8 @@ int byteSwap(int x, int n, int m) {
     int mnum = (x >> mseat) & 0xFF;
     int diff = nnum ^ mnum;
 
-    return x ^ (diff << nseat) ^ (diff << mseat);
+    /* 无符号掩码使左移按 32 位无符号规则计算，避免移入符号位时溢出。 */
+    return x ^ ((diff & 0xFFu) << nseat) ^ ((diff & 0xFFu) << mseat);
 }
 
 
@@ -158,10 +159,12 @@ unsigned reverse(unsigned v) {
 */
 int logicalShift(int x, int n) {
     int mask;
+    int zero = !n;
 
-    mask = ~(((1 << 31) >> n) << 1);
+    mask = 0x7FFFFFFF >> (n + ~0 + zero);
 
-    return (x >> n) & mask;
+    /* n 为 0 时保留原符号位，其余情况只保留逻辑右移后的低位。 */
+    return ((x >> n) & mask) | (x & ~0x7FFFFFFF & (~zero + 1));
 }
 
 
@@ -176,33 +179,32 @@ int logicalShift(int x, int n) {
 - 难度：4
 */
 int leftBitCount(int x) {
-    int n = 0;
+    int n;
     int b;
 
-    b = !(~x >> 16);
-    n = n + (b << 4);
-    x = x << (b << 4);
+    /* 原数前导 1 的个数等于取反后前导 0 的个数。 */
+    x = ~x;
+    b = (!!(x >> 16)) << 4;
+    n = b;
+    x = x >> b;
 
-    b = !(~x >> 24);
-    n = n + (b << 3);
-    x = x << (b << 3);
-
-    b = !(~x >> 28);
-    n = n + (b << 2);
-    x = x << (b << 2);
-
-    b = !(~x >> 30);
-    n = n + (b << 1);
-    x = x << (b << 1);
-
-    b = !(~x >> 31);
+    b = (!!(x >> 8)) << 3;
     n = n + b;
-    x = x << b;
+    x = x >> b;
 
-    b = !(~x >> 31);
+    b = (!!(x >> 4)) << 2;
     n = n + b;
+    x = x >> b;
 
-    return n;
+    b = (!!(x >> 2)) << 1;
+    n = n + b;
+    x = x >> b;
+
+    b = !!(x >> 1);
+    n = n + b;
+    x = x >> b;
+
+    return 32 + ~n + !x;
 }
 
 
@@ -230,10 +232,9 @@ unsigned float_i2f(int x) {
 
     sign = x & 0x80000000;
 
+    ux = x;
     if (x < 0) {
-        ux = ~x + 1;
-    } else {
-        ux = x;
+        ux = ~ux + 1;
     }
 
     pos = 31;

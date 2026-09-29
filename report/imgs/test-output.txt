@@ -1,0 +1,25 @@
+rm -f *.o btest fshow ishow *~ yacctab.py lextab.py result.txt .autograder_result
+gcc -O0 -Wall -std=gnu99 -lm -o btest bits.c btest.c decl.c tests.c
+btest.c:480:12: warning: variable 'points' set but not used [-Wunused-but-set-variable]
+  480 |     double points = 0.0;
+      |            ^
+btest.c:481:12: warning: variable 'max_points' set but not used [-Wunused-but-set-variable]
+  481 |     double max_points = 0.0;
+      |            ^
+2 warnings generated.
+gcc -O0 -Wall -std=gnu99 -o fshow fshow.c
+gcc -O0 -Wall -std=gnu99 -o ishow ishow.c
+Make success.
+bitAnd          1/1:     PASS
+bitXor          1/1:     PASS
+samesign        2/2:     PASS
+logtwo          4/4:     PASS
+byteSwap        4/4:     PASS
+reverse         3/3:     PASS
+logicalShift    3/3:     PASS
+leftBitCount    4/4:     PASS
+float_i2f       4/4:     PASS
+floatScale2     4/4:     PASS
+float64_f2i     3/3:     PASS
+floatPower2     4/4:     PASS
+Total points: 37
